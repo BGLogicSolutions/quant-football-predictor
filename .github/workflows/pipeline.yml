@@ -1,0 +1,37 @@
+name: Tubería Automatizada de Inversión Cuantitativa
+
+on:
+  schedule:
+    - cron: '0 10 * * 5' # Dispara el sistema de forma completamente autónoma todos los viernes a las 10:00 UTC
+  workflow_dispatch: # Permite ejecución manual instantánea desde la interfaz web móvil de GitHub
+
+jobs:
+  run-quant-pipeline:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Clonando Infraestructura del Repositorio
+        uses: actions/checkout@v3
+
+      - name: Desplegando Entorno Python de Producción
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalando Paquetes Científicos e Inteligencia Artificial
+        run: pip install -r requirements.txt
+
+      - name: Ejecutando Motor Predictivo y Gestión de Riesgo (Kelly)
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: python main.py
+
+      - name: Actualizando Base de Datos de Operaciones Registradas
+        run: |
+          git config --global user.name "QuantSyndicateBot"
+          git config --global user.email "syndicate-bot@github.com"
+          git add predicciones_auditadas.csv
+          git commit -m "🤖 [Automático] Nuevas posiciones cuantitativas validadas por Kelly" || echo "Ninguna operación nueva ingresada al portafolio hoy"
+          git push
