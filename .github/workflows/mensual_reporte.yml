@@ -1,0 +1,41 @@
+name: Auditoría Mensual de Rendimiento Portfolio
+
+on:
+  schedule:
+    - cron: '0 0 1 * *' # Se ejecuta de forma automática el día 1 de cada mes
+  workflow_dispatch: # Te permite activar el reporte de forma manual desde tu móvil
+
+jobs:
+  build-financial-report:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Descargando Código de Inversión
+        uses: actions/checkout@v3
+
+      - name: Cargando Python Industrial
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Montando Librerías de Análisis Numérico
+        run: pip install pandas
+
+      - name: Calculando Métricas Financieras y ROI
+        run: python -c "from src.reporte import generar_reporte_financiero; generar_reporte_financiero()"
+
+      - name: Publicando Reporte Ejecutivo en el Repositorio
+        run: |
+          git config --global user.name "QuantAuditorBot"
+          git config --global user.email "auditor-bot@github.com"
+          
+          # Verificar si se generó o modificó el reporte antes de confirmar los cambios
+          if git status --porcelain | grep -q REPORTE_RENDIMIENTO.md; then
+            git add REPORTE_RENDIMIENTO.md
+            git commit -m "📈 [Mensual] Reporte ejecutivo de rendimiento actualizado automáticamente"
+            git push
+          else
+            echo "Sin cambios significativos en el historial analítico para actualizar hoy."
+          fi
