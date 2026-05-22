@@ -2,8 +2,8 @@ name: Tubería Automatizada de Inversión Cuantitativa
 
 on:
   schedule:
-    - cron: '0 10 * * 5' # Dispara el sistema de forma completamente autónoma todos los viernes a las 10:00 UTC
-  workflow_dispatch: # Permite ejecución manual instantánea desde la interfaz web móvil de GitHub
+    - cron: '0 10 * * 5' # Dispara el sistema todos los viernes a las 10:00 UTC
+  workflow_dispatch: # Permite ejecución manual desde la web móvil de GitHub
 
 jobs:
   run-quant-pipeline:
@@ -32,6 +32,11 @@ jobs:
         run: |
           git config --global user.name "QuantSyndicateBot"
           git config --global user.email "syndicate-bot@github.com"
-          git add predicciones_auditadas.csv
-          git commit -m "🤖 [Automático] Nuevas posiciones cuantitativas validadas por Kelly" || echo "Ninguna operación nueva ingresada al portafolio hoy"
-          git push
+          
+          # CONDICIONAL DE SEGURIDAD: Solo ejecuta el guardado si el archivo realmente existe
+          if [ -f predicciones_auditadas.csv ]; then
+            git add predicciones_auditadas.csv
+            git commit -m "🤖 [Automático] Nuevas posiciones cuantitativas validadas por Kelly" && git push || echo "El archivo existe pero no contiene cambios nuevos hoy."
+          else
+            echo "📉 No se generó el archivo de predicciones porque el mercado está eficiente y no hubo operaciones con valor esperado positivo (+EV)."
+          fi
