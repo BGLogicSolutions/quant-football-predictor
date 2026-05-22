@@ -1,0 +1,6 @@
+{
+  "bankroll_inicial": 1000.0,
+  "fraccion_kelly": 0.10,
+  "minima_ventaja_requerida": 0.1,
+  "maximo_stake_permitido_por_partido": 10.0
+}
